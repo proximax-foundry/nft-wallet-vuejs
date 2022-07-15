@@ -1,5 +1,5 @@
 <template>
-  <div @click="clickEvent()">
+  <div class="min-h-screen" @click="clickEvent()">
     <headerComponentVue />
     <router-view />
     
