@@ -91,7 +91,7 @@ const fetchSessionStorage = () =>{
 }
 
 const removeSessionStorage = () =>{
-  const publicKey = sessionStorage.removeItem('userPublicKey')
+  sessionStorage.removeItem('userPublicKey')
   fetchSessionStorage()
 }
 onMounted(()=>{
