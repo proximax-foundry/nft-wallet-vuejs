@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen" @click="clickEvent()">
+  <div class="min-h-screen dark:bg-[#121212]" >
     <headerComponentVue />
     <router-view />
     
@@ -7,15 +7,11 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance } from 'vue';
 import headerComponentVue from './components/headerComponent.vue';
 
 
-const internalInstance = getCurrentInstance()
-const emitter = internalInstance!.appContext.config.globalProperties.emitter
-const clickEvent = () => {
-    emitter.emit("PAGE_CLICK")
-};
+
+
 </script>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
 <div>
-  <button v-if="address==''" @click="toggleModal=!toggleModal" class="px-3 bg-blue-600 rounded-lg py-1.5 text-white">Connect</button>
+  <button v-if="address==''" @click="toggleModal=!toggleModal" class="px-3 bg-blue-600 dark:bg-[#f73d93] rounded-lg py-1.5 text-white">Connect</button>
   <div v-else @mouseover="toggleWallet = true" @mouseout="toggleWallet = false" class="px-3 py-1 rounded-md border flex items-center cursor-pointer" :title="address">
     <img src="../assets/wallet.svg" class="w-8 h-8">
     <div class="truncate w-24 ml-1">{{address}}</div>
@@ -16,25 +16,25 @@
   >
       <div v-if="toggleModal" class="popup-outer-lang absolute flex z-50 ">
       <div class="modal-popup-box ">
-        <div class="bg-blue-300 text-center py-2 rounded-t-2xl text-lg font-semibold">Connect Wallet</div>
-        <div class="flex px-6 pt-2 pb-24 border-b-[2px] border-blue-600">
-          <div v-if="!mobileQrPage" @click="generateMobileQr()" class="flex flex-col items-center cursor-pointer hover:bg-blue-300 py-1.5 px-2 rounded-md">
+        <div class="bg-blue-300 text-center py-2 rounded-t-2xl text-lg font-semibold dark:bg-[#ffb6c1]">Connect Wallet</div>
+        <div class="flex px-6 pt-2 pb-24 border-b-[2px] dark:border-[#f73d93] border-blue-600 dark:bg-[#171717]">
+          <div v-if="!mobileQrPage" @click="generateMobileQr()" class=" flex flex-col items-center cursor-pointer hover:bg-blue-300 dark:hover:bg-[#ffb6c1] py-1.5 px-2 rounded-md">
               <img src="../assets/proximax-logo.png" class="w-10 h-10" >
-              <div class="font-semibold text-xs">Mobile Wallet</div>
+              <div class="font-semibold text-xs dark:text-white">Mobile Wallet</div>
           </div>
           <div v-if="mobileQrPage">
-            <div  v-html="qr"/>
+            <div class="my-6" v-html="qr"/>
             <div class="text-gray-500 text-center">Please scan the QR above with Sirius Mobile App to connect.</div>
           </div>
           
         </div>
-        <div class="flex justify-center">
-          <button class="my-3 py-1.5 px-6 text-center text-white bg-blue-700 rounded-xl">Learn how to connect</button>
+        <div class="flex justify-center dark:bg-[#171717]">
+          <button class="my-3 py-1.5 px-6 text-center text-white bg-blue-700 dark:bg-[#f73d93] rounded-xl">Learn how to connect</button>
         </div>
       </div>
     </div>
   </transition>
-  <div @click="closeModal()" v-if="toggleModal" class="fixed inset-0 bg-opacity-60 bg-gray-100 z-20"></div>
+  <div @click="closeModal()" v-if="toggleModal" class="fixed inset-0 opacity-50 bg-gray-600 dark:bg-[#171717] z-20"></div>
 </div>
 </template>
 
@@ -43,13 +43,16 @@ import { shallowRef } from "@vue/reactivity"
 import { Peer } from "peerjs"
 import QRCode from 'qrcode'
 import { NetworkType, PublicAccount } from "tsjs-xpx-chain-sdk"
-import { onMounted } from "vue";
+import { getCurrentInstance, onMounted } from "vue";
 
 const toggleModal = shallowRef(false)
 const toggleWallet = shallowRef(false)
 const qr = shallowRef('')
 const address = shallowRef('')
 const mobileQrPage = shallowRef(false)
+const internalInstance = getCurrentInstance()
+const emitter = internalInstance!.appContext.config.globalProperties.emitter
+
 const generateMobileQr = () =>{
   
   const peer = new Peer(); 
@@ -73,6 +76,7 @@ const generateMobileQr = () =>{
         conn.send("success")
         sessionStorage.setItem('userPublicKey',signerPubAcc.publicKey)
         fetchSessionStorage()
+        emitter.emit('Mobile Wallet Connected')
         peer.disconnect()
         closeModal()
       } else {
@@ -109,6 +113,6 @@ const closeModal = () =>{
   top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 300px;
 }
 .modal-popup-box{
-  @apply transition ease-in duration-300 w-[500px] bg-white shadow-xl rounded-2xl border border-blue-600;
+  @apply transition ease-in duration-300 w-[500px] bg-white shadow-xl rounded-2xl ;
 }
 </style>

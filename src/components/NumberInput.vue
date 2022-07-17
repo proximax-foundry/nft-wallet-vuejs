@@ -1,9 +1,9 @@
 <template>
-<div class="border border-black px-3 py-1.5">
+<div class="border border-black dark:border-0">
   <AutoNumericVue 
   :value="modelValue"
   :disabled ='disabled'
-  class="supply_input"  
+  class="supply_input px-3 py-1.5"  
   :options="{
     showWarnings : false,
     digitGroupSeparator: ',',
