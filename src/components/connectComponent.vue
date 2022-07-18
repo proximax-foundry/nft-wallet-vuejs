@@ -1,9 +1,9 @@
 <template>
 <div>
   <button v-if="address==''" @click="toggleModal=!toggleModal" class="px-3 bg-blue-600 dark:bg-[#f73d93] rounded-lg py-1.5 text-white">Connect</button>
-  <div v-else @mouseover="toggleWallet = true" @mouseout="toggleWallet = false" class="px-3 py-1 rounded-md border flex items-center cursor-pointer" :title="address">
+  <div v-else @mouseover="toggleWallet = true" @mouseout="toggleWallet = false" class="px-3 py-1 rounded-md bg-blue-600 dark:bg-[#f73d93] flex items-center cursor-pointer" :title="address">
     <img src="../assets/wallet.svg" class="w-8 h-8">
-    <div class="truncate w-24 ml-1">{{address}}</div>
+    <div class="truncate w-24 ml-1 text-white">{{address}}</div>
   </div>
   <div v-if="toggleWallet" @mouseover="toggleWallet = true" @mouseout="toggleWallet = false" class=" relative">
     <div class="absolute bg-white w-full border border-t-0 rounded-md ">
@@ -96,6 +96,7 @@ const fetchSessionStorage = () =>{
 
 const removeSessionStorage = () =>{
   sessionStorage.removeItem('userPublicKey')
+  emitter.emit('Mobile Wallet Disconnected')
   fetchSessionStorage()
 }
 onMounted(()=>{
