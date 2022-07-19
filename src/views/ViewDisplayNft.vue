@@ -1,16 +1,16 @@
 <template>
-<div class="mx-12 justify-center ">
-    <div class="font-semibold mt-8 dark:text-white mb-2">My items</div>
+<div class="mx-12 justify-center pt-8">
     <div v-if="!isConnected" class="text-center text-red-600 bg-red-300 rounded-lg ml-auto mr-auto w-52 py-1.5">Wallet is not connected</div>
+    <div class="font-semibold  dark:text-white mb-2">My items</div>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 items-center ">
         <div v-for="(asset,index) of assets" :key="index" >
             <div class="flex flex-col ">
                 <router-link :to="`nft-details/${asset.id}`">
                     <img class="img" :src="asset.image" >
-                    <div class="dark:text-white">{{asset.name}}</div>
-                    <div class="dark:text-white">Asset ID:</div>
-                    <div class="dark:text-white break-all">{{asset.id}}</div>
-                </router-link>
+                 </router-link>
+                <div class="dark:text-white">{{asset.name}}</div>
+                <div class="dark:text-white">Asset ID:</div>
+                <div class="dark:text-white break-all">{{asset.id}}</div>
             </div>
         </div>
     </div>
@@ -99,6 +99,7 @@ const fetchNft = async() =>{
             mosaicInfo.isSupplyMutable() == false
         })
         let tempNftHexIds = filteredMosaicInfos.map(mosaicInfo=> mosaicInfo.mosaicId.id.toHex())
+        
         nftIds = nftIds.concat(tempNftHexIds)
     }
     

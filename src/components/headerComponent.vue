@@ -1,5 +1,5 @@
 <template>
-<div class="px-6 py-1 flex justify-between items-center border-b-[2px] border-blue-500 dark:border-[#f73d93] ">
+<div class="px-6 py-1 flex justify-between items-center border-b-[2px] border-blue-500 dark:border-blue-600 ">
     <sidebarComponentVue />
     <router-link to="/">
         <img src="../assets/proximax-logo.png" class="w-12 h-12 cursor-pointer"/>

@@ -5,7 +5,7 @@
     <div class="mt-2 dark:text-white">Name</div>
     <TextInputVue placeholder="Name your item" v-model="name"/>
     <div class="mt-4 dark:text-white">Description</div>
-    <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item" class="w-full px-3  py-1.5 mt-1 border border-black"></textarea>
+    <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item" class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
     <div class="mt-4 dark:text-white">External Link</div>
     <TextInputVue placeholder="https://yoursite.io/item/123"  v-model="externalLink"  />
     <div class="mt-4 dark:text-white">Properties</div>
@@ -20,11 +20,11 @@
             </div>
         </div>
     </div>
-    <div class="text-blue-600 font-semibold w-[70px] text-xs mt-2 cursor-pointer dark:text-[#f73d93]" @click="addProperty()">+ Add more</div>
+    <div class="text-blue-600 font-semibold w-[70px] text-xs mt-2 cursor-pointer dark:text-blue-600" @click="addProperty()">+ Add more</div>
     <div class="mt-4 dark:text-white">Royalties</div>
     <div class="my-2 text-gray-500 text-xs" >Collect a fee (XPX) when a user re-sells an item you created.</div>
     <NumberInput v-model="royalties" :decimal="6"/>
-    <button @click="createItem()" class="dark:bg-[#f73d93] flex px-5 ml-auto mr-auto mt-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50" :disabled="disabledCreate">Create Item</button>
+    <button @click="createItem()" class="dark:bg-blue-600 flex px-5 ml-auto mr-auto mt-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50" :disabled="disabledCreate">Create Item</button>
     
    <!--qr modal-->
     <transition enter-active-class="animate__animated animate__fadeInDown" leave-active-class="animate__animated animate__fadeOutUp">
@@ -32,7 +32,7 @@
             <div class="modal-popup-box ">
                 <div v-html="qr" class="w-8/12 ml-auto mr-auto py-3" />
                 <div class="text-gray-500 ml-auto mr-auto w-8/12">Please scan the QR above with Sirius Mobile App to sign the transaction.</div>
-                <div @click="toggleModal=false;qr=''" class="cursor-pointer flex justify-center my-3 bg-blue-600 dark:bg-[#f73d93] w-24 rounded-lg text-white py-1.5 ml-auto mr-auto">Close</div>
+                <div @click="toggleModal=false;qr=''" class="cursor-pointer flex justify-center my-3 bg-blue-600 dark:bg-blue-600 w-24 rounded-lg text-white py-1.5 ml-auto mr-auto">Close</div>
             </div>
         </div>
     </transition>
