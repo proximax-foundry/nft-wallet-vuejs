@@ -111,7 +111,7 @@ const getAttributeObject = () =>{
 
 //create button validation
 const disabledCreate = computed(()=>{
-    return !attributeNames.value.every(name=>name!='') || !attributeValues.value.every(name=>name!='') || name.value=='' || externalLink.value == ''
+    return !attributeNames.value.every(name=>name!='') || !attributeValues.value.every(name=>name!='') || name.value=='' || externalLink.value == '' || publicKey.value == ''
 })
 
 //reset inputs
@@ -175,7 +175,13 @@ const createItem = async() =>{
     const mosaicLevyTx = mosaicLevyBuilder
     .deadline(Deadline.create())
     .mosaicId(assetDefinitionTx.mosaicId) 
-    .mosaicLevy(MosaicLevy.createWithAbsoluteFee(publicAccount.address,new MosaicId('13bfc518e40549d7'),parseFloat(royalties.value)))
+    .mosaicLevy(
+        MosaicLevy.createWithAbsoluteFee(
+            publicAccount.address,
+            new MosaicId('13bfc518e40549d7'), /* prx.xpx in testnet2 */
+            parseFloat(royalties.value)*Math.pow(10,6)
+        )
+    )
     .networkType(NetworkType.TEST_NET)
     .build()
 

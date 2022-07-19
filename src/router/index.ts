@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import ViewHomeView from '../views/ViewHome.vue'
 import ViewCreateNft from '../views/ViewCreateNft.vue'
 import ViewDisplayNft from '../views/ViewDisplayNft.vue'
+import ViewNftDetails from '../views/ViewNftDetails.vue'
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -14,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/view-nft',
     component: ViewDisplayNft,
+  },
+  {
+    path: '/view-nft-details/:assetId',
+    props: true,
+    component: ViewNftDetails,
   },
 ]
 

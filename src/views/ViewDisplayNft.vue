@@ -5,10 +5,12 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 items-center ">
         <div v-for="(asset,index) of assets" :key="index" >
             <div class="flex flex-col ">
-                <img class="img box-border" :src="asset.image" >
-                <div class="dark:text-white">{{asset.name}}</div>
-                <div class="dark:text-white">Asset ID:</div>
-                <div class="dark:text-white break-all">{{asset.id}}</div>
+                <router-link :to="`nft-details/${asset.id}`">
+                    <img class="img" :src="asset.image" >
+                    <div class="dark:text-white">{{asset.name}}</div>
+                    <div class="dark:text-white">Asset ID:</div>
+                    <div class="dark:text-white break-all">{{asset.id}}</div>
+                </router-link>
             </div>
         </div>
     </div>
