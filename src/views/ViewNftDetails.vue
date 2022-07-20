@@ -132,6 +132,9 @@ const fetchMetadata = async() =>{
     }
     let searchedMetadata = await metadataHttp.searchMetadata(metadataQueryParams).toPromise() 
     let metadataEntry = searchedMetadata.metadataEntries[0]
+    if(!metadataEntry){
+        router.push('/view-nft')
+    }
     if(convertUtf8(metadataEntry.scopedMetadataKey.toHex()) == 'nft.json'){
         asset.value = ({
             name: JSON.parse(metadataEntry.value).name,
