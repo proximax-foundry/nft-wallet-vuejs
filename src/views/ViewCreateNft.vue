@@ -44,10 +44,11 @@
 import {  computed, getCurrentInstance, shallowRef, watch, ref} from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
-import { AggregateBondedTransactionBuilder, Convert, Deadline, InnerTransaction, Mosaic, MosaicDefinitionTransactionBuilder, MosaicId, MosaicLevy, MosaicMetadataTransactionBuilder, MosaicModifyLevyTransactionBuilder, MosaicNonce, MosaicProperties,MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { AccountHttp, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, InnerTransaction, MosaicDefinitionTransactionBuilder, MosaicId, MosaicLevy, MosaicMetadataTransactionBuilder, MosaicModifyLevyTransactionBuilder, MosaicNonce, MosaicProperties,MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
 import QRCode from 'qrcode'
 
 //initialize variables
+const testnetUrl = 'https://api-2.testnet2.xpxsirius.io'
 const name = shallowRef('')
 const description = shallowRef('')
 const externalLink = shallowRef('')
@@ -111,6 +112,7 @@ const getAttributeObject = () =>{
 
 //create button validation
 const disabledCreate = computed(()=>{
+    console.log(!attributeNames.value.every(name=>name!=''))
     return !attributeNames.value.every(name=>name!='') || !attributeValues.value.every(name=>name!='') || name.value=='' || externalLink.value == '' || publicKey.value == ''
 })
 
@@ -120,9 +122,10 @@ const resetInputs = () =>{
     description.value = ''
     externalLink.value = ''
     attributeNames.value = []
-    attributeNames.value = []
+    attributeValues.value = []
     royalties.value = '0'
 }
+
 //create nft transaction
 const createItem = async() =>{
     const newValue = {
@@ -132,9 +135,12 @@ const createItem = async() =>{
         attributes: getAttributeObject()
     }
     resetInputs()
+    const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
+    const accountHttp = new AccountHttp(testnetUrl)
+    const multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
+    const isMultisig = multisigInfo.cosignatories.length>0
     const assetDefinitionBuilder = new MosaicDefinitionTransactionBuilder()
     const nonce = MosaicNonce.createRandom(); 
-    const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
     const assetDefinitionTx = assetDefinitionBuilder
     .deadline(Deadline.create())
     .mosaicNonce(nonce)
@@ -192,7 +198,8 @@ const createItem = async() =>{
     if(parseFloat(royalties.value)>0){
         innerTx.push(mosaicLevyTx.toAggregate(publicAccount))
     }
-    const aggregateTxBuilder = new AggregateBondedTransactionBuilder()
+    let aggregateTxBuilder :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
+    aggregateTxBuilder = isMultisig? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
     const aggregateTx = aggregateTxBuilder
     .deadline(Deadline.create())
     .innerTransactions(innerTx)
@@ -214,7 +221,7 @@ const createItem = async() =>{
 
 <style scoped>
 .popup-outer-lang{
-  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 350px;
+  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 500px;
 }
 .modal-popup-box{
   @apply transition ease-in duration-300 w-[500px] bg-white shadow-xl rounded-2xl ;

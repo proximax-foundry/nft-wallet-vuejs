@@ -36,8 +36,8 @@
 </div>
 </template>
 <script lang="ts" setup>
-import { AggregateBondedTransactionBuilder, Convert, Deadline, InnerTransaction, MetadataHttp, MetadataQueryParams, MetadataType, MosaicId, MosaicLevy, MosaicMetadataTransactionBuilder, MosaicModifyLevyTransactionBuilder, NetworkType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
-import { computed, getCurrentInstance, ref, shallowRef, watch } from 'vue';
+import { AccountHttp, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, InnerTransaction, MetadataHttp, MetadataQueryParams, MetadataType, MosaicId, MosaicLevy, MosaicMetadataTransactionBuilder, MosaicModifyLevyTransactionBuilder, NetworkType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { computed, getCurrentInstance, ref, shallowRef, watch, defineProps } from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import NumberInput from '@/components/NumberInput.vue';
 import { useRouter } from 'vue-router';
@@ -152,6 +152,9 @@ import QRCode from 'qrcode'
             return
         }
         const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
+        const accountHttp = new AccountHttp(testnetUrl) 
+        const multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
+        const isMultisig = multisigInfo.cosignatories.length>0
         const mosaicMetadataBuilder = new MosaicMetadataTransactionBuilder() 
         const mosaicMetadataTx = mosaicMetadataBuilder
         .deadline(Deadline.create())
@@ -183,7 +186,8 @@ import QRCode from 'qrcode'
         /* if(parseFloat(royalties.value)>0){
             innerTx.push(mosaicLevyTx.toAggregate(publicAccount))
         } */
-        const aggregateTxBuilder = new AggregateBondedTransactionBuilder() 
+        let aggregateTxBuilder :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
+        aggregateTxBuilder = isMultisig? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
         const aggregateTx = aggregateTxBuilder
         .deadline(Deadline.create())
         .innerTransactions(innerTx)
@@ -234,7 +238,7 @@ import QRCode from 'qrcode'
 
 <style scoped>
 .popup-outer-lang{
-  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 499px;
+  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 500px;
 }
 .modal-popup-box{
   @apply transition ease-in duration-300 w-[500px] bg-white shadow-xl rounded-2xl ;

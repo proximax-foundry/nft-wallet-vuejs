@@ -34,8 +34,8 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { AccountHttp, Address, Convert, Mosaic, MosaicId, NamespaceHttp, NamespaceId, NetworkType, PlainMessage, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
-import { computed, getCurrentInstance, shallowRef, watch } from 'vue';
+import { AccountHttp, Address, AggregateBondedTransactionBuilder, Convert, Deadline, Mosaic, MosaicId, NamespaceHttp, NamespaceId, NetworkType, PlainMessage, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { computed, getCurrentInstance, shallowRef, watch, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import QRCode from 'qrcode'
 
@@ -149,7 +149,12 @@ import QRCode from 'qrcode'
         if(props.assetId==undefined){
             return
         }
+        const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
+        const accountHttp = new AccountHttp(testnetUrl)
+        const multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
+        const isMultisig = multisigInfo.cosignatories.length>0
         let msg = PlainMessage.create(message.value); 
+
         let transferBuilder = new TransferTransactionBuilder()
         let transferTx= transferBuilder
         .recipient(Address.createFromRawAddress(recipientAddress.value))
@@ -157,8 +162,15 @@ import QRCode from 'qrcode'
         .message(msg)
         .networkType(NetworkType.TEST_NET)
         .build()
+
+        let aggregateBondedBuilder = new AggregateBondedTransactionBuilder() 
+        let aggregateBondedTx = aggregateBondedBuilder
+        .deadline(Deadline.create())
+        .innerTransactions([transferTx.toAggregate(publicAccount)])
+        .networkType(NetworkType.TEST_NET)
+        .build()
         const data = {
-            payload:transferTx.serialize(),
+            payload: isMultisig?aggregateBondedTx.serialize():transferTx.serialize(),
             type:'sign',
             generationHash: "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9", //testnet2
             encrypted: encrypted.value,
@@ -201,7 +213,7 @@ import QRCode from 'qrcode'
 
 <style scoped>
 .popup-outer-lang{
-  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 350px;
+  top: 80px; left: 0; right: 0; margin-left: auto; margin-right: auto; max-width: 500px;
 }
 .modal-popup-box{
   @apply transition ease-in duration-300 w-[500px] bg-white shadow-xl rounded-2xl ;
