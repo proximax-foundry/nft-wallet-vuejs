@@ -18,9 +18,9 @@
         </div>
     </div>
     <div class="text-blue-600 font-semibold w-[70px] text-xs mt-2 cursor-pointer dark:text-blue-600" @click="addProperty()">+ Add more</div>
-    <div class="mt-4 dark:text-white">Royalties</div>
+    <!-- <div class="mt-4 dark:text-white">Royalties</div>
     <div class="my-2 text-gray-500 text-xs" >Collect a fee (XPX) when a user re-sells an item you created.</div>
-    <NumberInput v-model="royalties" :decimal="6"/>
+    <NumberInput v-model="royalties" :decimal="6"/> -->
     <button @click="updateMetadataTxn()" class="dark:bg-blue-600 flex px-5 ml-auto mr-auto mt-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50" :disabled="disabledUpdate">Update Item</button>
     <!--qr modal-->
     <transition enter-active-class="animate__animated animate__fadeInDown" leave-active-class="animate__animated animate__fadeOutUp">
@@ -59,7 +59,7 @@ import QRCode from 'qrcode'
     const newAttributeKeys = ref([''])
     const newAttributeValues = ref([''])
     const oldValue = ref()
-    const royalties = shallowRef('0')
+    /* const royalties = shallowRef('0') */
     const toggleModal = shallowRef(false)
     const qr = shallowRef('')
     //convert both array values into object keys and values
@@ -164,25 +164,25 @@ import QRCode from 'qrcode'
         .networkType(NetworkType.TEST_NET)
         .build()
 
-        const mosaicLevyBuilder = new MosaicModifyLevyTransactionBuilder()
+        /* const mosaicLevyBuilder = new MosaicModifyLevyTransactionBuilder()
         const mosaicLevyTx = mosaicLevyBuilder
         .deadline(Deadline.create())
         .mosaicId(new MosaicId(props.assetId)) 
         .mosaicLevy(
             MosaicLevy.createWithAbsoluteFee(
                 publicAccount.address,
-                new MosaicId('13bfc518e40549d7'), /* prx.xpx in testnet2 */
+                new MosaicId('13bfc518e40549d7'), 
                 parseFloat(royalties.value)*Math.pow(10,6)
             )
         )
         .networkType(NetworkType.TEST_NET)
-        .build() 
+        .build() */ 
 
         let innerTx :InnerTransaction[] = [mosaicMetadataTx.toAggregate(publicAccount)] 
         
-        if(parseFloat(royalties.value)>0){
+        /* if(parseFloat(royalties.value)>0){
             innerTx.push(mosaicLevyTx.toAggregate(publicAccount))
-        }
+        } */
         const aggregateTxBuilder = new AggregateBondedTransactionBuilder() 
         const aggregateTx = aggregateTxBuilder
         .deadline(Deadline.create())
