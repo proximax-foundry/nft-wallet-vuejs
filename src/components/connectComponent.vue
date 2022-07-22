@@ -72,6 +72,7 @@ const generateMobileQr = () =>{
       type: "connect",
       recvId: peer.id,
       secret: secret,
+      origin: window.location.origin,
       generationHash: "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9", //testnet2
     };
     qr.value = await QRCode.toString(JSON.stringify(qrValue))

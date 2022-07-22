@@ -77,8 +77,10 @@ const convertUtf8 = (scopedMetadataKey :string)=>{
 }
 
 //fetch nfts from account
+const delay =( ms :number)=> new Promise(res => setTimeout(res, ms))
+
 const fetchNft = async() =>{
-    let dataPerRequest = 50
+    let dataPerRequest = 100
     let publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
     const accountHttp = new AccountHttp(testnetUrl)
     const metadataHttp = new MetadataHttp(testnetUrl)
@@ -87,7 +89,7 @@ const fetchNft = async() =>{
     const mosaicIds :MosaicId[] = accountInfo.mosaics.map(mosaic=>mosaic.id) //get all account mosaics
     let numOfRequest = Math.ceil(mosaicIds.length / dataPerRequest)
     let nftIds :string[] = [] //filter nft ids
-    for (let i = 0; i < numOfRequest; i++) { //max 50 requests per api call
+    for (let i = 0; i < numOfRequest; i++) { //max 100 requests per api call
         let startIndex = i * dataPerRequest
         let endIndex = (i + 1) * dataPerRequest
         let requestData = mosaicIds.slice(startIndex, endIndex) 
@@ -102,24 +104,41 @@ const fetchNft = async() =>{
         
         nftIds = nftIds.concat(tempNftHexIds)
     }
-    
-    numOfRequest = Math.ceil(nftIds.length / dataPerRequest)
-    for (let i = 0; i < numOfRequest; i++) {   
+    let metadataQueryParams = new MetadataQueryParams() 
+    metadataQueryParams.metadataType = MetadataType.MOSAIC 
+    metadataQueryParams.pageSize = 100;
+    metadataQueryParams.pageNumber = 1;
+    metadataQueryParams.targetKey = publicKey.value
+    let searchedMetadata = await metadataHttp.searchMetadata(metadataQueryParams).toPromise()
+    for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
+        let metadataEntry = searchedMetadata.metadataEntries[i]
+        if(convertUtf8(metadataEntry.scopedMetadataKey.toHex()) == 'nft.json'){
+            assets.value.push({
+                name: JSON.parse(metadataEntry.value).name,
+                image: JSON.parse(metadataEntry.value).image,
+                id:metadataEntry.targetId.toHex()
+            })
+        }
+    }
+    let totalPageNumber = searchedMetadata.pagination.totalPages
+    await delay(250)
+    for (let i = 2; i <= totalPageNumber; i++) {   
         let metadataQueryParams = new MetadataQueryParams() 
         metadataQueryParams.metadataType = MetadataType.MOSAIC 
-        metadataQueryParams.pageSize = dataPerRequest
-        metadataQueryParams.pageNumber = i //50 at once
-        metadataQueryParams.targetKey = publicAccount
+        metadataQueryParams.pageSize = 100
+        metadataQueryParams.pageNumber = i;
+        metadataQueryParams.targetKey = publicKey.value
         let searchedMetadata = await metadataHttp.searchMetadata(metadataQueryParams).toPromise()
-        for (let i = 0; i < searchedMetadata.metadataEntries.length; i++) {   
+        for(let i = 0; i< searchedMetadata.metadataEntries.length; i++){
             let metadataEntry = searchedMetadata.metadataEntries[i]
             if(convertUtf8(metadataEntry.scopedMetadataKey.toHex()) == 'nft.json'){
-                assets.value.push({
-                    name: JSON.parse(metadataEntry.value).name,
-                    image: JSON.parse(metadataEntry.value).image,
-                    id:metadataEntry.targetId.toHex()
-                })
-            }
+            assets.value.push({
+                name: JSON.parse(metadataEntry.value).name,
+                image: JSON.parse(metadataEntry.value).image,
+                id:metadataEntry.targetId.toHex()
+            })
+        }
+            await delay(250)
         }
     }   
 }
