@@ -52,11 +52,20 @@ const address = shallowRef('')
 const mobileQrPage = shallowRef(false)
 const internalInstance = getCurrentInstance()
 const emitter = internalInstance!.appContext.config.globalProperties.emitter
+const generateRandomString = (length :number) => {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
 
 const generateMobileQr = () =>{
   
   const peer = new Peer(); 
-  const secret = "this is a secret"
+  const secret = "Welcome to the NFT wallet. Please sign the message below to verify your identity. Your custom challenge is: " + generateRandomString(64)
 
   peer.on("open", async()=> {
     const qrValue = {

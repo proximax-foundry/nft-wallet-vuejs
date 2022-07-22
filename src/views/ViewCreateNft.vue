@@ -21,9 +21,9 @@
         </div>
     </div>
     <div class="text-blue-600 font-semibold w-[70px] text-xs mt-2 cursor-pointer dark:text-blue-600" @click="addProperty()">+ Add more</div>
-    <div class="mt-4 dark:text-white">Royalties</div>
+    <!-- <div class="mt-4 dark:text-white">Royalties</div>
     <div class="my-2 text-gray-500 text-xs" >Collect a fee (XPX) when a user re-sells an item you created.</div>
-    <NumberInput v-model="royalties" :decimal="6"/>
+    <NumberInput v-model="royalties" :decimal="6"/> -->
     <button @click="createItem()" class="dark:bg-blue-600 flex px-5 ml-auto mr-auto mt-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50" :disabled="disabledCreate">Create Item</button>
     
    <!--qr modal-->
@@ -184,7 +184,7 @@ const createItem = async() =>{
     .mosaicLevy(
         MosaicLevy.createWithAbsoluteFee(
             publicAccount.address,
-            new MosaicId('13bfc518e40549d7'), /* prx.xpx in testnet2 */
+            new MosaicId('13bfc518e40549d7'), 
             parseFloat(royalties.value)*Math.pow(10,6)
         )
     )
