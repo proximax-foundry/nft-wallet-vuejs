@@ -1128,7 +1128,7 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://nft-tool/util_(ignored)?");
 /******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	!function() {
-/******/ 		__webpack_require__.p = "/";
+/******/ 		__webpack_require__.p = "/nft-wallet-vuejs/";
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/jsonp chunk loading */
