@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "build-stg": "cross-env NODE_ENV=staging vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@types/qrcode": "^1.4.2",
     "@vueuse/core": "^8.9.3",
     "autonumeric-vue": "^1.0.8",
+    "cross-env": "^7.0.3",
     "mitt": "^3.0.0",
     "node-polyfill-webpack-plugin": "^2.0.0",
     "peerjs": "^1.4.6",

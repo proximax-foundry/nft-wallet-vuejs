@@ -137,8 +137,6 @@ const createItem = async() =>{
     resetInputs()
     const publicAccount = PublicAccount.createFromPublicKey(publicKey.value,NetworkType.TEST_NET)
     const accountHttp = new AccountHttp(testnetUrl)
-    const multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
-    const isMultisig = multisigInfo.cosignatories.length>0
     const assetDefinitionBuilder = new MosaicDefinitionTransactionBuilder()
     const nonce = MosaicNonce.createRandom(); 
     const assetDefinitionTx = assetDefinitionBuilder
@@ -198,8 +196,9 @@ const createItem = async() =>{
     if(parseFloat(royalties.value)>0){
         innerTx.push(mosaicLevyTx.toAggregate(publicAccount))
     }
+    let multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address)
     let aggregateTxBuilder :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
-    aggregateTxBuilder = isMultisig? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
+    aggregateTxBuilder = multisigInfo? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
     const aggregateTx = aggregateTxBuilder
     .deadline(Deadline.create())
     .innerTransactions(innerTx)
