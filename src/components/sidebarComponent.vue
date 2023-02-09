@@ -3,7 +3,7 @@
 <Sidebar v-model:visible="visibleLeft" class="bg-white dark:bg-[#141414] border dark:border-0" :baseZIndex="10000">
     <div class="px-6 py-3 flex flex-col gap-2">
         <div class="cursor-pointer text-2xl dark:text-white mb-24" >NFT Maker Tool</div>
-        <div class="cursor-pointer dark:text-white">NFT Marketplace</div>
+        <router-link to="/create-sid" @click="visibleLeft = false" class="cursor-pointer dark:text-white">Create Sirius ID</router-link >
         <router-link to="/view-nft" @click="visibleLeft = false" class="cursor-pointer dark:text-white">View NFT</router-link >
         <router-link @click="visibleLeft = false" class="dark:text-white" to="/create-nft">Create NFT</router-link>
         <div class="cursor-pointer dark:text-white">Settings</div>

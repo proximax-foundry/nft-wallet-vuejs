@@ -5,6 +5,9 @@ import ViewDisplayNft from '../views/ViewDisplayNft.vue'
 import ViewNftDetails from '../views/ViewNftDetails.vue'
 import ViewTransferNft from '../views/ViewTransferNft.vue'
 import ViewEditNft from '../views/ViewEditNft.vue'
+import ViewCreateSid from '../views/ViewCreateSid.vue'
+
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -13,6 +16,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/create-nft',
     component: ViewCreateNft,
+  },
+  {
+    path: '/create-sid',
+    component: ViewCreateSid,
   },
   {
     path: '/view-nft',
