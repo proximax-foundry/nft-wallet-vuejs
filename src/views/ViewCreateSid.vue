@@ -3,6 +3,8 @@
         <div class="font-semibold mt-8 dark:text-white">Create New item</div>
         <div v-if="!isConnected" class="text-center text-red-600 bg-red-300 rounded-lg ml-auto mr-auto w-52 py-1.5">
             Wallet is not connected</div>
+        <div class="mt-2 dark:text-white">Issuer private key (connected wallet's private key)</div>
+        <TextInputVue placeholder="Issuer private key" v-model="privateKey" />
         <div class="mt-2 dark:text-white">Issuer Name</div>
         <TextInputVue placeholder="Issuer Name" v-model="issuerName" />
         <div class="mt-4 dark:text-white">Description</div>
@@ -10,13 +12,14 @@
             class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
         <div class="mt-4 dark:text-white">Image URL</div>
         <TextInputVue placeholder="https://yoursite.io/item/123" v-model="imgUrl" />
-        <div class="mt-4 text-lg dark:text-white">Credential Payload</div>
         <div class="mt-4 dark:text-white">Name</div>
         <TextInputVue placeholder="Name" v-model="name" />
         <div class="mt-4 dark:text-white">Type</div>
         <TextInputVue placeholder="Type" v-model="type" />
         <div class="mt-4 dark:text-white">Email</div>
         <TextInputVue placeholder="Email" v-model="email" />
+        <div class="mt-4 dark:text-white">Recipient</div>
+        <TextInputVue placeholder="Recipient address" v-model="recipient" />
 
 
         <button @click="createItem()"
@@ -43,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AccountHttp, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, InnerTransaction, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { shallowRef, watch } from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import { eagerComputed } from '@vueuse/shared';
@@ -53,11 +56,13 @@ import Peer from 'peerjs';
 
 const isConnected = shallowRef(false)
 const issuerName = shallowRef('')
+const privateKey = shallowRef('')
 const name = shallowRef('')
 const type = shallowRef('')
 const email = shallowRef('')
 const description = shallowRef('')
 const publicKey = shallowRef('')
+const recipient = shallowRef('')
 const imgUrl = shallowRef('')
 const fetchSessionStorage = () => {
     const searchStorage = sessionStorage.getItem('userPublicKey')
@@ -81,19 +86,24 @@ const resetInputs = () => {
 }
 
 const createItem = async() => {
+    const publicAccount = PublicAccount.createFromPublicKey(publicKey.value, NetworkType.TEST_NET)
+
+    let encryptedCredential = EncryptedMessage.create(JSON.stringify({
+            name: name.value,
+            type: type.value,
+            email: email.value,
+        }),publicAccount,
+        privateKey.value
+    )
+        
     const newValue = {
         issuer: issuerName.value,
         description: description.value,
         image: imgUrl.value,
-        credentialPayload: {
-            name: name.value,
-            type: type.value,
-            email: email.value,
-        }
+        credentialPayload: encryptedCredential.payload
     }
     resetInputs()
 
-    const publicAccount = PublicAccount.createFromPublicKey(publicKey.value, NetworkType.TEST_NET)
     const accountHttp = new AccountHttp(testnetUrl)
     const assetDefinitionBuilder = new MosaicDefinitionTransactionBuilder()
     const nonce = MosaicNonce.createRandom();
@@ -132,16 +142,24 @@ const createItem = async() => {
         .calculateDifferences()
         .networkType(NetworkType.TEST_NET)
         .build()
+    const transferTxBuilder = new TransferTransactionBuilder()
+    const transferTx = transferTxBuilder
+        .deadline(Deadline.create())
+        .recipient(Address.createFromRawAddress(recipient.value))
+        .mosaics([])
+        .networkType(NetworkType.TEST_NET)
+        .build()
 
-    const innerTx: InnerTransaction[] = [
+        const innerTx: InnerTransaction[] = [
         assetDefinitionTx.toAggregate(publicAccount),
         assetSupplyChangeTx.toAggregate(publicAccount),
-        mosaicMetadataTx.toAggregate(publicAccount)
+        mosaicMetadataTx.toAggregate(publicAccount),
+        transferTx.toAggregate(publicAccount)
     ]
 
-    let multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address)
+    let multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
     let aggregateTxBuilder :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
-    aggregateTxBuilder = multisigInfo? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
+    aggregateTxBuilder = multisigInfo.cosignatories.length? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
     const aggregateTx = aggregateTxBuilder
     .deadline(Deadline.create())
     .innerTransactions(innerTx)
@@ -152,7 +170,6 @@ const createItem = async() => {
     peer.on("open", async () => {
         const data = {
             payload: peer.id,
-            /* payload:aggregateTx.serialize(), */
             type:'reqPeerID',
             generationHash: "56D112C98F7A7E34D1AEDC4BD01BC06CA2276DD546A93E36690B785E82439CA9", //testnet2
             callbackUrl: null,
