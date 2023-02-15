@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, Mosaic, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { shallowRef, watch } from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import { eagerComputed } from '@vueuse/shared';
@@ -146,7 +146,7 @@ const createItem = async() => {
     const transferTx = transferTxBuilder
         .deadline(Deadline.create())
         .recipient(Address.createFromRawAddress(recipient.value))
-        .mosaics([])
+        .mosaics([new Mosaic(assetDefinitionTx.mosaicId,UInt64.fromUint(1))])
         .networkType(NetworkType.TEST_NET)
         .build()
 
@@ -156,10 +156,8 @@ const createItem = async() => {
         mosaicMetadataTx.toAggregate(publicAccount),
         transferTx.toAggregate(publicAccount)
     ]
-
-    let multisigInfo = await accountHttp.getMultisigAccountInfo(publicAccount.address).toPromise()
-    let aggregateTxBuilder :AggregateBondedTransactionBuilder | AggregateCompleteTransactionBuilder
-    aggregateTxBuilder = multisigInfo.cosignatories.length? new AggregateBondedTransactionBuilder() : new AggregateCompleteTransactionBuilder()
+    
+    const aggregateTxBuilder = new AggregateBondedTransactionBuilder() 
     const aggregateTx = aggregateTxBuilder
     .deadline(Deadline.create())
     .innerTransactions(innerTx)
