@@ -12,12 +12,19 @@
             class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
         <div class="mt-4 dark:text-white">Image URL</div>
         <TextInputVue placeholder="https://yoursite.io/item/123" v-model="imgUrl" />
-        <div class="mt-4 dark:text-white">Name</div>
-        <TextInputVue placeholder="Name" v-model="name" />
-        <div class="mt-4 dark:text-white">Type</div>
-        <TextInputVue placeholder="Type" v-model="type" />
-        <div class="mt-4 dark:text-white">Email</div>
-        <TextInputVue placeholder="Email" v-model="email" />
+        <div class="mt-4 dark:text-white">Properties</div>
+        <div v-for="(attributeName,index) of attributeNames" :key="index" >
+            <div class="flex gap-2 mb-2" >
+                <img src="../assets/icon-delete-red.svg" class="w-4 h-4 cursor-pointer mt-2.5" @click="removeProperty(index)">
+                <div class="w-full">
+                    <TextInputVue placeholder="Property name" errorMessage="More than 8 bytes." v-model="attributeNames[index]" />
+                </div>
+                <div class="w-full">
+                    <TextInputVue placeholder="Property value" v-model="attributeValues[index]" />
+                </div>
+            </div>
+        </div>
+        <div class="text-blue-600 font-semibold w-[70px] text-xs mt-2 cursor-pointer dark:text-blue-600" @click="addProperty()">+ Add more</div>
         <div class="mt-4 dark:text-white">Recipient</div>
         <TextInputVue placeholder="Recipient public key" v-model="recipient" />
 
@@ -47,7 +54,7 @@
 
 <script lang="ts" setup>
 import { AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, Mosaic, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
-import { shallowRef, watch } from 'vue';
+import { shallowRef, watch, ref } from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import { eagerComputed } from '@vueuse/shared';
 import QRCode from 'qrcode'
@@ -57,13 +64,28 @@ import Peer from 'peerjs';
 const isConnected = shallowRef(false)
 const issuerName = shallowRef('')
 const privateKey = shallowRef('')
-const name = shallowRef('')
-const type = shallowRef('')
-const email = shallowRef('')
 const description = shallowRef('')
 const publicKey = shallowRef('')
 const recipient = shallowRef('')
 const imgUrl = shallowRef('')
+const attributeNames = ref(['']) 
+const attributeValues = ref([''])
+//add and remove property
+const addProperty = () =>{
+    attributeNames.value.push('')
+    attributeValues.value.push('')
+}
+
+const removeProperty = (i :number) => {
+    attributeNames.value.splice(i, 1);
+    attributeValues.value.splice(i, 1)
+}
+//convert both array values into object keys and values
+const getAttributeObject = () =>{
+    return attributeNames.value.reduce((key,value,index)=>{
+        return {...key, [value]: attributeValues.value[index]};
+    },{})
+}
 const fetchSessionStorage = () => {
     const searchStorage = sessionStorage.getItem('userPublicKey')
     if (searchStorage != null) {
@@ -77,23 +99,20 @@ const qr = shallowRef('')
 const testnetUrl = 'https://api-2.testnet2.xpxsirius.io'
 
 const resetInputs = () => {
-    name.value = ''
     description.value = ''
     imgUrl.value = ''
     issuerName.value = ''
-    type.value = ''
-    email.value = ''
+    attributeNames.value = []
+    attributeValues.value = []
 }
 
 const createItem = async() => {
     const recipientPublicAccount = PublicAccount.createFromPublicKey(recipient.value, NetworkType.TEST_NET)
     const publicAccount = PublicAccount.createFromPublicKey(publicKey.value, NetworkType.TEST_NET)
 
-    let encryptedCredential = EncryptedMessage.create(JSON.stringify({
-            name: name.value,
-            type: type.value,
-            email: email.value,
-        }),recipientPublicAccount,
+    let encryptedCredential = EncryptedMessage.create(JSON.stringify(
+            getAttributeObject()
+        ),recipientPublicAccount,
         privateKey.value
     )
         
