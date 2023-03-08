@@ -19,7 +19,7 @@
         <div class="mt-4 dark:text-white">Email</div>
         <TextInputVue placeholder="Email" v-model="email" />
         <div class="mt-4 dark:text-white">Recipient</div>
-        <TextInputVue placeholder="Recipient address" v-model="recipient" />
+        <TextInputVue placeholder="Recipient public key" v-model="recipient" />
 
 
         <button @click="createItem()"
@@ -86,13 +86,14 @@ const resetInputs = () => {
 }
 
 const createItem = async() => {
+    const recipientPublicAccount = PublicAccount.createFromPublicKey(recipient.value, NetworkType.TEST_NET)
     const publicAccount = PublicAccount.createFromPublicKey(publicKey.value, NetworkType.TEST_NET)
 
     let encryptedCredential = EncryptedMessage.create(JSON.stringify({
             name: name.value,
             type: type.value,
             email: email.value,
-        }),publicAccount,
+        }),recipientPublicAccount,
         privateKey.value
     )
         
@@ -145,7 +146,7 @@ const createItem = async() => {
     const transferTxBuilder = new TransferTransactionBuilder()
     const transferTx = transferTxBuilder
         .deadline(Deadline.create())
-        .recipient(Address.createFromRawAddress(recipient.value))
+        .recipient(recipientPublicAccount.address)
         .mosaics([new Mosaic(assetDefinitionTx.mosaicId,UInt64.fromUint(1))])
         .networkType(NetworkType.TEST_NET)
         .build()
