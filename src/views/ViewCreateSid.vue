@@ -7,6 +7,8 @@
         <TextInputVue placeholder="Issuer private key" v-model="privateKey" />
         <div class="mt-2 dark:text-white">Issuer Name</div>
         <TextInputVue placeholder="Issuer Name" v-model="issuerName" />
+        <div class="mt-2 dark:text-white">Status</div>
+        <TextInputVue placeholder="Status" v-model="status" />
         <div class="mt-4 dark:text-white">Description</div>
         <textarea type="text " v-model="description" placeholder="Prepare a detailed description of your item"
             class="w-full px-3  py-1.5 mt-1 border focus:outline-none border-black"></textarea>
@@ -53,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, Mosaic, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
+import { Account, AccountHttp, Address, AggregateBondedTransactionBuilder, AggregateCompleteTransactionBuilder, Convert, Deadline, EncryptedMessage, InnerTransaction, Mosaic, MosaicDefinitionTransactionBuilder, MosaicId, MosaicMetadataTransactionBuilder, MosaicNonce, MosaicProperties, MosaicSupplyChangeTransactionBuilder, MosaicSupplyType, NetworkType, PublicAccount, TransferTransactionBuilder, UInt64 } from 'tsjs-xpx-chain-sdk';
 import { shallowRef, watch, ref } from 'vue';
 import TextInputVue from '@/components/TextInput.vue';
 import { eagerComputed } from '@vueuse/shared';
@@ -75,7 +77,7 @@ const addProperty = () =>{
     attributeNames.value.push('')
     attributeValues.value.push('')
 }
-
+const status = ref("")
 const removeProperty = (i :number) => {
     attributeNames.value.splice(i, 1);
     attributeValues.value.splice(i, 1)
@@ -120,11 +122,14 @@ const createItem = async() => {
         issuer: issuerName.value,
         description: description.value,
         image: imgUrl.value,
-        credentialPayload: encryptedCredential.payload
+        status:status.value,
+        credentialPayload: encryptedCredential.payload,
+        signature: Account.createFromPrivateKey(privateKey.value, NetworkType.TEST_NET).signData(JSON.stringify(
+            getAttributeObject()
+        ))
     }
     resetInputs()
 
-    const accountHttp = new AccountHttp(testnetUrl)
     const assetDefinitionBuilder = new MosaicDefinitionTransactionBuilder()
     const nonce = MosaicNonce.createRandom();
     const assetDefinitionTx = assetDefinitionBuilder
